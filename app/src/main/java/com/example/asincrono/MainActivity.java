@@ -12,12 +12,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity  {
 
-    Button btn3;
-    TextView caraFeliz;
-    ProgressBar progressBar;
-    ProgressDialog a;
+    Button btn_execute_AsynTask;
+    TextView textoCara;
+    ProgressBar barraDeProgreso;
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,33 +25,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
 
-        btn3        = findViewById(R.id.button3);
-        progressBar = findViewById(R.id.progressBar);
-        caraFeliz   = findViewById(R.id.caraFeliz);
+        btn_execute_AsynTask = findViewById(R.id.button3);
+        barraDeProgreso = findViewById(R.id.progressBar);
+        textoCara = findViewById(R.id.caraFeliz);
 
-        a = new ProgressDialog(MainActivity.this);
+        dialog = new ProgressDialog(MainActivity.this);
 
 
-        a.setCanceledOnTouchOutside(true);
-
-        btn3.setOnClickListener(this);
-
-    }
-
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId())
-        {
-            case R.id.button3:
-
-                AsynTaskExampl a = new AsynTaskExampl();
-                a.execute();
-                break;
-
-        }
+        dialog.setCanceledOnTouchOutside(true);
+        btn_execute_AsynTask.setOnClickListener(v-> {
+            //se crea un objeto cada que se da click al btn.
+            AsynTaskExampl asynTask = new AsynTaskExampl();
+            asynTask.execute();
+        } );
 
     }
+
 
 
     //Usando Hilos nativos de JAVA
@@ -84,27 +73,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      }
 
 
-    //primer parametro es el tipo de entrada doInBackground, segundo parametro es el tipo de dato con el que se actualiza la tarea, ultimo parametro es lo que regresa el postExecute
+    //primer parametro es el tipo de entrada doInBackground, segundo parametro es el tipo de dato
+    //con el que se actualiza la tarea, ultimo parametro es lo que regresa el postExecute
     private class AsynTaskExampl extends AsyncTask<Void,Integer,Boolean>{
 
-        //se ejecuta en el hilo principal, todoo lo que se ejecute antes de la tarea en segundo plano, VARIABLES O UI
+        //OnPreExecute ejecuta en el hilo principal,
+        //todoo lo que se ejecute antes de la tarea en segundo plano, VARIABLES O UI
         @Override
         protected void onPreExecute() {
-            caraFeliz.setText("");
-            progressBar.setMax(50);
-            progressBar.setProgress(0);
-            a.setTitle("Segundos para Easter Egg:");
-            a.setMessage("5");
-            a.show();
-            a.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    cancel(true);
-                }
-            });
+            textoCara.setText("");
+            barraDeProgreso.setMax(50);
+            barraDeProgreso.setProgress(0);
+            dialog.setTitle("Segundos para Easter Egg:");
+            dialog.setMessage("5");
+            dialog.show();
+            //cualquira de las dos opciones
+            //dialog.setOnCancelListener(dialog -> cancel(true));
+            dialog.setOnDismissListener(dialog1 -> cancel(true));
         }
 
-        //si existen tres puntos como en Void... o Integer...  Significa que puede ser varios
+        //si existen tres puntos como en Void... o Integer...  Significa que puede ser mas de uno
 
         //lo que se hace en segundo plano el parametro es el primer valor de la clase
         //dentro se puede invocar publishProgress para comunicar al Hilo principal el progreso de la tarea
@@ -120,21 +108,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
 
-
-
             return true;
         }
 
-        //se ejecuta en el hilo principal, cando tu haces la llamada a publishprogress, se prolonga en segundo plano hasta que la tarea termine
+        //se ejecuta en el hilo principal, cando haces la llamada a publishprogress,
+        //se prolonga en segundo plano hasta que la tarea termine
         //el int es el valor para actualizar
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
 
-            progressBar.setProgress(values[0].intValue());
-            a.setMessage(""+(5-
-                    (values[0].intValue()
-                            /10)));
+            barraDeProgreso.setProgress(values[0].intValue());
+            dialog.setMessage(""+(5- (values[0].intValue() /10)));
         }
 
         //se ejecuta cuando la tarea termina, Un Toast que diga que se termino completamente, recibe el valor desde doInBackground
@@ -142,8 +127,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         protected void onPostExecute(Boolean isOK) {
             //super.onPostExecute(isOK);
             if (isOK ){
-                a.dismiss();
-                caraFeliz.setText(":D");
+                dialog.dismiss();
+                textoCara.setText(":D");
                 Toast.makeText(MainActivity.this, "TERMINADO CON EXITO!!!", Toast.LENGTH_SHORT).show();
             }
 
@@ -155,10 +140,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onCancelled() {
             super.onCancelled();
-            caraFeliz.setText("TT__TT");
-            progressBar.setProgress(0);
+            textoCara.setText("TT__TT");
+            barraDeProgreso.setProgress(0);
             Toast.makeText(MainActivity.this, "Tarea Interrumpida...", Toast.LENGTH_SHORT).show();
-            
+
         }
 
 
